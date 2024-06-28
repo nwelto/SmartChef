@@ -1,0 +1,6 @@
+@SmartChef_HostAddress = http://localhost:5241
+
+GET {{SmartChef_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
