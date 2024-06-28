@@ -25,7 +25,7 @@ public class SmartChefDbContext : DbContext
                 RecipeId = 1,
                 Title = "Spaghetti Bolognese",
                 Instructions = "Cook spaghetti. Prepare the sauce...",
-                Ingredients = "[\"Spaghetti\", \"Ground Beef\", \"Tomato Sauce\"]",
+                Ingredients = "Spaghetti, Ground Beef, Tomato Sauce",
                 ImageUrl = "http://example.com/spaghetti.jpg",
                 SourceUrl = "http://example.com/spaghetti-recipe"
             },
@@ -34,7 +34,7 @@ public class SmartChefDbContext : DbContext
                 RecipeId = 2,
                 Title = "Grilled Cheese Sandwich",
                 Instructions = "Butter the bread. Grill the cheese...",
-                Ingredients = "[\"Bread\", \"Cheese\", \"Butter\"]",
+                Ingredients = "Bread, Cheese, Butter",
                 ImageUrl = "http://example.com/grilledcheese.jpg",
                 SourceUrl = "http://example.com/grilledcheese-recipe"
             }
@@ -57,6 +57,7 @@ public class SmartChefDbContext : DbContext
             .HasForeignKey(ur => ur.RecipeId);
     }
 }
+
 
 
 
