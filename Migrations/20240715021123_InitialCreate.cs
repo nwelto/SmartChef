@@ -22,8 +22,8 @@ namespace SmartChef.Migrations
                     Title = table.Column<string>(type: "text", nullable: false),
                     Instructions = table.Column<string>(type: "text", nullable: false),
                     Ingredients = table.Column<string>(type: "text", nullable: false),
-                    ImageUrl = table.Column<string>(type: "text", nullable: false),
-                    SourceUrl = table.Column<string>(type: "text", nullable: false)
+                    ImageUrl = table.Column<string>(type: "text", nullable: true),
+                    SourceUrl = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -34,15 +34,15 @@ namespace SmartChef.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    UserId = table.Column<int>(type: "integer", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    FirebaseUid = table.Column<string>(type: "text", nullable: false),
-                    Email = table.Column<string>(type: "text", nullable: false),
-                    Username = table.Column<string>(type: "text", nullable: false)
+                    Uid = table.Column<string>(type: "text", nullable: true),
+                    UserName = table.Column<string>(type: "text", nullable: true),
+                    Email = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.UserId);
+                    table.PrimaryKey("PK_Users", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -67,7 +67,7 @@ namespace SmartChef.Migrations
                         name: "FK_UserRecipes_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "UserId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -76,13 +76,13 @@ namespace SmartChef.Migrations
                 columns: new[] { "RecipeId", "ImageUrl", "Ingredients", "Instructions", "SourceUrl", "Title" },
                 values: new object[,]
                 {
-                    { 1, "http://example.com/spaghetti.jpg", "[\"Spaghetti\", \"Ground Beef\", \"Tomato Sauce\"]", "Cook spaghetti. Prepare the sauce...", "http://example.com/spaghetti-recipe", "Spaghetti Bolognese" },
-                    { 2, "http://example.com/grilledcheese.jpg", "[\"Bread\", \"Cheese\", \"Butter\"]", "Butter the bread. Grill the cheese...", "http://example.com/grilledcheese-recipe", "Grilled Cheese Sandwich" }
+                    { 1, "http://example.com/spaghetti.jpg", "Spaghetti, Ground Beef, Tomato Sauce", "Cook spaghetti. Prepare the sauce...", "http://example.com/spaghetti-recipe", "Spaghetti Bolognese" },
+                    { 2, "http://example.com/grilledcheese.jpg", "Bread, Cheese, Butter", "Butter the bread. Grill the cheese...", "http://example.com/grilledcheese-recipe", "Grilled Cheese Sandwich" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "UserId", "Email", "FirebaseUid", "Username" },
+                columns: new[] { "Id", "Email", "Uid", "UserName" },
                 values: new object[,]
                 {
                     { 1, "user1@example.com", "firebase-uid-1", "user1" },

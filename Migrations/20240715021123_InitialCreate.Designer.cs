@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace SmartChef.Migrations
 {
     [DbContext(typeof(SmartChefDbContext))]
-    [Migration("20240628043859_UpDatedGroqResp")]
-    partial class UpDatedGroqResp
+    [Migration("20240715021123_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -58,7 +58,7 @@ namespace SmartChef.Migrations
                         {
                             RecipeId = 1,
                             ImageUrl = "http://example.com/spaghetti.jpg",
-                            Ingredients = "[\"Spaghetti\", \"Ground Beef\", \"Tomato Sauce\"]",
+                            Ingredients = "Spaghetti, Ground Beef, Tomato Sauce",
                             Instructions = "Cook spaghetti. Prepare the sauce...",
                             SourceUrl = "http://example.com/spaghetti-recipe",
                             Title = "Spaghetti Bolognese"
@@ -67,7 +67,7 @@ namespace SmartChef.Migrations
                         {
                             RecipeId = 2,
                             ImageUrl = "http://example.com/grilledcheese.jpg",
-                            Ingredients = "[\"Bread\", \"Cheese\", \"Butter\"]",
+                            Ingredients = "Bread, Cheese, Butter",
                             Instructions = "Butter the bread. Grill the cheese...",
                             SourceUrl = "http://example.com/grilledcheese-recipe",
                             Title = "Grilled Cheese Sandwich"
@@ -76,42 +76,39 @@ namespace SmartChef.Migrations
 
             modelBuilder.Entity("SmartChef.Models.User", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("FirebaseUid")
-                        .IsRequired()
+                    b.Property<string>("Uid")
                         .HasColumnType("text");
 
-                    b.Property<string>("Username")
-                        .IsRequired()
+                    b.Property<string>("UserName")
                         .HasColumnType("text");
 
-                    b.HasKey("UserId");
+                    b.HasKey("Id");
 
                     b.ToTable("Users");
 
                     b.HasData(
                         new
                         {
-                            UserId = 1,
+                            Id = 1,
                             Email = "user1@example.com",
-                            FirebaseUid = "firebase-uid-1",
-                            Username = "user1"
+                            Uid = "firebase-uid-1",
+                            UserName = "user1"
                         },
                         new
                         {
-                            UserId = 2,
+                            Id = 2,
                             Email = "user2@example.com",
-                            FirebaseUid = "firebase-uid-2",
-                            Username = "user2"
+                            Uid = "firebase-uid-2",
+                            UserName = "user2"
                         });
                 });
 

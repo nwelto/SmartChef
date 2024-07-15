@@ -2,10 +2,10 @@
 {
     public class User
     {
-        public int UserId { get; set; }
-        public string FirebaseUid { get; set; }
-        public string Email { get; set; }
-        public string Username { get; set; }
+        public int Id { get; set; }
+        public string? Uid { get; set; }
+        public string? UserName { get; set; }
+        public string? Email { get; set; }
 
         public ICollection<UserRecipe> UserRecipes { get; set; }
     }

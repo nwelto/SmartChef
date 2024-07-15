@@ -22,7 +22,7 @@ public class FirebaseAuthenticationMiddleware
                 try
                 {
                     var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(token);
-                    context.Items["FirebaseUid"] = decodedToken.Uid;
+                    context.Items["Uid"] = decodedToken.Uid;
                 }
                 catch
                 {
