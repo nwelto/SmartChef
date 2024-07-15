@@ -1,3 +1,5 @@
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.EntityFrameworkCore;
 using SmartChef.Models;
 using System.Text.Json;
@@ -7,6 +9,19 @@ using SmartChef.API;
 using GroqApiLibrary;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Ensure the path is correctly loaded from the configuration
+var serviceAccountKeyPath = builder.Configuration["Firebase:ServiceAccountKeyPath"];
+if (string.IsNullOrEmpty(serviceAccountKeyPath))
+{
+    throw new ArgumentNullException("Firebase:ServiceAccountKeyPath", "The Firebase service account key path cannot be null.");
+}
+
+// Initialize Firebase Admin SDK
+FirebaseApp.Create(new AppOptions()
+{
+    Credential = GoogleCredential.FromFile(serviceAccountKeyPath)
+});
 
 // Add services to the container.
 builder.Services.AddNpgsql<SmartChefDbContext>(builder.Configuration["SmartChefDbConnectionString"]);
@@ -55,6 +70,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<FirebaseAuthenticationMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
@@ -64,7 +80,6 @@ UsersAPI.Map(app);
 UserRecipesAPI.Map(app);
 
 app.Run();
-
 
 
 

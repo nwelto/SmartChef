@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FirebaseAdmin.Auth;
+using Microsoft.EntityFrameworkCore;
 using SmartChef;
 using SmartChef.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace SmartChef.API
 {
@@ -9,13 +11,29 @@ namespace SmartChef.API
         public static void Map(WebApplication app)
         {
             // Check User
-            app.MapGet("/checkUser/{uid}", async (SmartChefDbContext db, string uid) =>
+            app.MapPost("/checkUser", async (SmartChefDbContext db, HttpContext context) =>
             {
+                if (!context.Items.ContainsKey("FirebaseUid"))
+                {
+                    return Results.Unauthorized();
+                }
+
+                string uid = context.Items["FirebaseUid"].ToString();
                 var user = await db.Users.Where(u => u.FirebaseUid == uid).FirstOrDefaultAsync();
 
                 if (user == null)
                 {
-                    return Results.NotFound();
+                    // Assuming you have user details from the token or request, create a new user
+                    var userRecord = await FirebaseAuth.DefaultInstance.GetUserAsync(uid);
+                    user = new User
+                    {
+                        FirebaseUid = uid,
+                        Email = userRecord.Email,
+                        Username = userRecord.DisplayName
+                    };
+
+                    db.Users.Add(user);
+                    await db.SaveChangesAsync();
                 }
 
                 var userInfo = new
