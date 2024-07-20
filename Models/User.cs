@@ -9,5 +9,5 @@
 
         public ICollection<UserRecipe> UserRecipes { get; set; }
     }
-
 }
+

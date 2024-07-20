@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SmartChef;
 using SmartChef.Models;
+using SmartChef.Dtos;
 using Microsoft.Extensions.Logging;
+using SmartChef.Dtos.SmartChef.Dtos;
 
 namespace SmartChef.API
 {
@@ -9,10 +11,10 @@ namespace SmartChef.API
     {
         public static void Map(WebApplication app)
         {
-            //Check User
-            app.MapGet("/checkUser/{uid}", (SmartChefDbContext db, string uid) =>
+            // Check User
+            app.MapPost("/checkUser/{uid}", (SmartChefDbContext db, string uid) =>
             {
-                var user = db.Users.FirstOrDefault(u => u.Uid == uid);
+                var user = db.Users.Where(u => u.Uid == uid).FirstOrDefault();
 
                 if (user == null)
                 {
@@ -22,119 +24,73 @@ namespace SmartChef.API
                 return Results.Ok(user);
             });
 
-            //Register User
-            app.MapPost("/users/register", (SmartChefDbContext db, User newUser) =>
+            // Register User
+            app.MapPost("/registerUser", (SmartChefDbContext db, UserDto newUserDto) =>
             {
-                try
+                // Check if the email is already registered
+                var existingUser = db.Users.FirstOrDefault(u => u.Email == newUserDto.Email);
+                if (existingUser != null)
                 {
-                    db.Users.Add(newUser);
-                    db.SaveChanges();
-                    return Results.Created($"/users/{newUser.Id}", newUser);
+                    return Results.Conflict("Email already registered");
                 }
-                catch (DbUpdateException)
+
+                // Create a new User entity from the provided DTO
+                var newUser = new User
                 {
-                    return Results.BadRequest("Unable to register user");
-                }
+                    UserName = newUserDto.UserName,
+                    Email = newUserDto.Email,
+                    Uid = newUserDto.Uid
+                };
+
+                db.Users.Add(newUser);
+                db.SaveChanges();
+
+                return Results.Created($"/users/{newUser.Id}", newUser);
             });
 
-            // Get user by ID
-            app.MapGet("/users/{userId}", async (SmartChefDbContext db, int userId, ILogger<Program> logger) =>
+            // Update User
+            app.MapPut("/updateUser/{userId}", (SmartChefDbContext db, int userId, UserDto updatedUserDto) =>
             {
-                try
-                {
-                    var user = await db.Users.FindAsync(userId);
+                var userToUpdate = db.Users.Find(userId);
 
-                    if (user == null)
-                    {
-                        logger.LogWarning($"User with ID {userId} not found.");
-                        return Results.NotFound(new { message = "User not found." });
-                    }
-
-                    return Results.Ok(user);
-                }
-                catch (Exception ex)
+                if (userToUpdate == null)
                 {
-                    logger.LogError($"Error fetching user with ID {userId}: {ex.Message}");
-                    return Results.Problem("Internal server error");
+                    return Results.NotFound(); // return a 404 Not Found response
                 }
+
+                userToUpdate.UserName = updatedUserDto.UserName;
+                userToUpdate.Email = updatedUserDto.Email;
+
+                db.SaveChanges();
+
+                // Return a 200 OK response with the updated user details in the response body
+                return Results.Ok(userToUpdate);
             });
 
-            // Get all users
-            app.MapGet("/users", async (SmartChefDbContext db, ILogger<Program> logger) =>
+            // Get single user's details
+            app.MapGet("/singleUser/{userId}", (SmartChefDbContext db, int userId) =>
             {
-                try
+                var singleUser = db.Users
+                .Where(u => u.Id == userId)
+                .Select(u => new
                 {
-                    var users = await db.Users.ToListAsync();
-                    return Results.Ok(users);
-                }
-                catch (Exception ex)
+                    u.Id,
+                    u.UserName,
+                    u.Email,
+                    u.Uid
+                })
+                .SingleOrDefault();
+
+                if (singleUser == null)
                 {
-                    logger.LogError($"Error fetching all users: {ex.Message}");
-                    return Results.Problem("Internal server error");
+                    return Results.NotFound();
                 }
-            });
 
-            // Update user
-            app.MapPut("/users/{userId}", async (SmartChefDbContext db, int userId, User updatedUser, ILogger<Program> logger) =>
-            {
-                try
-                {
-                    var user = await db.Users.FindAsync(userId);
-
-                    if (user == null)
-                    {
-                        logger.LogWarning($"User with ID {userId} not found.");
-                        return Results.NotFound(new { message = "User not found." });
-                    }
-
-                    // Update the user's details
-                    user.UserName = updatedUser.UserName ?? user.UserName;
-                    user.Email = updatedUser.Email ?? user.Email;
-
-                    await db.SaveChangesAsync();
-
-                    return Results.Ok(user);
-                }
-                catch (DbUpdateException ex)
-                {
-                    logger.LogError($"Error updating user with ID {userId}: {ex.Message}");
-                    return Results.BadRequest(new { message = "Unable to update user" });
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError($"Error updating user with ID {userId}: {ex.Message}");
-                    return Results.Problem("Internal server error");
-                }
-            });
-
-            // Delete user
-            app.MapDelete("/users/{userId}", async (SmartChefDbContext db, int userId, ILogger<Program> logger) =>
-            {
-                try
-                {
-                    var user = await db.Users.FindAsync(userId);
-
-                    if (user == null)
-                    {
-                        logger.LogWarning($"User with ID {userId} not found.");
-                        return Results.NotFound(new { message = "User not found." });
-                    }
-
-                    db.Users.Remove(user);
-                    await db.SaveChangesAsync();
-
-                    return Results.Ok(new { message = "User successfully deleted." });
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError($"Error deleting user with ID {userId}: {ex.Message}");
-                    return Results.Problem("Internal server error");
-                }
+                return Results.Ok(singleUser);
             });
         }
     }
 }
-
 
 
 
