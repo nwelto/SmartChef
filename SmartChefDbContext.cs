@@ -15,8 +15,8 @@ public class SmartChefDbContext : DbContext
 
         // Seed data
         modelBuilder.Entity<User>().HasData(
-            new User { UserId = 1, FirebaseUid = "firebase-uid-1", Email = "user1@example.com", Username = "user1" },
-            new User { UserId = 2, FirebaseUid = "firebase-uid-2", Email = "user2@example.com", Username = "user2" }
+            new User { Id = 1, Uid = "firebase-uid-1", Email = "user1@example.com", UserName = "user1" },
+            new User { Id = 2, Uid = "firebase-uid-2", Email = "user2@example.com", UserName = "user2" }
         );
 
         modelBuilder.Entity<Recipe>().HasData(

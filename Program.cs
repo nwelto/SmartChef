@@ -25,7 +25,6 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
     {
         policy.WithOrigins("http://localhost:3000", "http://localhost:5003")
-        .AllowAnyOrigin()
         .AllowAnyMethod()
         .AllowAnyHeader();
     });
@@ -64,7 +63,6 @@ UsersAPI.Map(app);
 UserRecipesAPI.Map(app);
 
 app.Run();
-
 
 
 

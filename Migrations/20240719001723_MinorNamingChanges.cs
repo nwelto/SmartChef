@@ -5,7 +5,7 @@
 namespace SmartChef.Migrations
 {
     /// <inheritdoc />
-    public partial class UpDatedGroqResp : Migration
+    public partial class MinorNamingChanges : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

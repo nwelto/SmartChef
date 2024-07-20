@@ -73,42 +73,39 @@ namespace SmartChef.Migrations
 
             modelBuilder.Entity("SmartChef.Models.User", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("FirebaseUid")
-                        .IsRequired()
+                    b.Property<string>("Uid")
                         .HasColumnType("text");
 
-                    b.Property<string>("Username")
-                        .IsRequired()
+                    b.Property<string>("UserName")
                         .HasColumnType("text");
 
-                    b.HasKey("UserId");
+                    b.HasKey("Id");
 
                     b.ToTable("Users");
 
                     b.HasData(
                         new
                         {
-                            UserId = 1,
+                            Id = 1,
                             Email = "user1@example.com",
-                            FirebaseUid = "firebase-uid-1",
-                            Username = "user1"
+                            Uid = "firebase-uid-1",
+                            UserName = "user1"
                         },
                         new
                         {
-                            UserId = 2,
+                            Id = 2,
                             Email = "user2@example.com",
-                            FirebaseUid = "firebase-uid-2",
-                            Username = "user2"
+                            Uid = "firebase-uid-2",
+                            UserName = "user2"
                         });
                 });
 

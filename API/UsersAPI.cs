@@ -1,6 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SmartChef;
 using SmartChef.Models;
+using SmartChef.Dtos;
+using Microsoft.Extensions.Logging;
+using SmartChef.Dtos.SmartChef.Dtos;
 
 namespace SmartChef.API
 {
@@ -9,118 +12,86 @@ namespace SmartChef.API
         public static void Map(WebApplication app)
         {
             // Check User
-            app.MapGet("/checkUser/{uid}", async (SmartChefDbContext db, string uid) =>
+            app.MapPost("/checkUser/{uid}", (SmartChefDbContext db, string uid) =>
             {
-                var user = await db.Users.Where(u => u.FirebaseUid == uid).FirstOrDefaultAsync();
+                var user = db.Users.Where(u => u.Uid == uid).FirstOrDefault();
 
                 if (user == null)
                 {
-                    return Results.NotFound();
+                    return Results.NotFound("User not registered");
                 }
-
-                var userInfo = new
-                {
-                    user.UserId,
-                    user.Username,
-                    user.Email,
-                    user.FirebaseUid
-                };
-
-                return Results.Ok(userInfo);
-            });
-
-            // Add a new user
-            app.MapPost("/user", async (SmartChefDbContext db, User newUser) =>
-            {
-                if (string.IsNullOrEmpty(newUser.FirebaseUid) || string.IsNullOrEmpty(newUser.Email) || string.IsNullOrEmpty(newUser.Username))
-                {
-                    return Results.BadRequest("Invalid user data.");
-                }
-
-                db.Users.Add(newUser);
-                await db.SaveChangesAsync();
-                return Results.Created($"/user/{newUser.UserId}", newUser);
-            });
-
-            // Get user by ID
-            app.MapGet("/users/{userId}", async (SmartChefDbContext db, int userId) =>
-            {
-                var user = await db.Users.FindAsync(userId);
-
-                if (user == null)
-                {
-                    return Results.NotFound("User not found.");
-                }
-
-                var userDetails = new
-                {
-                    UserId = user.UserId,
-                    Username = user.Username,
-                    Email = user.Email
-                };
-
-                return Results.Ok(userDetails);
-            });
-
-            // Get all users
-            app.MapGet("/users", async (SmartChefDbContext db) =>
-            {
-                var users = await db.Users.Select(user => new
-                {
-                    UserId = user.UserId,
-                    Username = user.Username,
-                    Email = user.Email
-                }).ToListAsync();
-
-                return Results.Ok(users);
-            });
-
-            // Update user
-            app.MapPut("/users/{userId}", async (SmartChefDbContext db, int userId, User updatedUser) =>
-            {
-                var user = await db.Users.FindAsync(userId);
-
-                if (user == null)
-                {
-                    return Results.NotFound("User not found.");
-                }
-
-                // Check for unique email
-                if (!string.IsNullOrWhiteSpace(updatedUser.Email) && updatedUser.Email != user.Email)
-                {
-                    var existingUser = await db.Users.FirstOrDefaultAsync(u => u.Email == updatedUser.Email);
-                    if (existingUser != null)
-                    {
-                        return Results.BadRequest("A user with this email already exists.");
-                    }
-                }
-
-                // Update the user's details
-                user.Username = updatedUser.Username ?? user.Username;
-                user.Email = updatedUser.Email ?? user.Email;
-
-                await db.SaveChangesAsync();
 
                 return Results.Ok(user);
             });
 
-            // Delete user
-            app.MapDelete("/users/{userId}", async (SmartChefDbContext db, int userId) =>
+            // Register User
+            app.MapPost("/registerUser", (SmartChefDbContext db, UserDto newUserDto) =>
             {
-                var user = await db.Users.FindAsync(userId);
-
-                if (user == null)
+                // Check if the email is already registered
+                var existingUser = db.Users.FirstOrDefault(u => u.Email == newUserDto.Email);
+                if (existingUser != null)
                 {
-                    return Results.NotFound("User not found.");
+                    return Results.Conflict("Email already registered");
                 }
 
-                db.Users.Remove(user);
-                await db.SaveChangesAsync();
+                // Create a new User entity from the provided DTO
+                var newUser = new User
+                {
+                    UserName = newUserDto.UserName,
+                    Email = newUserDto.Email,
+                    Uid = newUserDto.Uid
+                };
 
-                return Results.Ok("User successfully deleted.");
+                db.Users.Add(newUser);
+                db.SaveChanges();
+
+                return Results.Created($"/users/{newUser.Id}", newUser);
+            });
+
+            // Update User
+            app.MapPut("/updateUser/{userId}", (SmartChefDbContext db, int userId, UserDto updatedUserDto) =>
+            {
+                var userToUpdate = db.Users.Find(userId);
+
+                if (userToUpdate == null)
+                {
+                    return Results.NotFound(); // return a 404 Not Found response
+                }
+
+                userToUpdate.UserName = updatedUserDto.UserName;
+                userToUpdate.Email = updatedUserDto.Email;
+
+                db.SaveChanges();
+
+                // Return a 200 OK response with the updated user details in the response body
+                return Results.Ok(userToUpdate);
+            });
+
+            // Get single user's details
+            app.MapGet("/singleUser/{userId}", (SmartChefDbContext db, int userId) =>
+            {
+                var singleUser = db.Users
+                .Where(u => u.Id == userId)
+                .Select(u => new
+                {
+                    u.Id,
+                    u.UserName,
+                    u.Email,
+                    u.Uid
+                })
+                .SingleOrDefault();
+
+                if (singleUser == null)
+                {
+                    return Results.NotFound();
+                }
+
+                return Results.Ok(singleUser);
             });
         }
     }
 }
+
+
 
 
